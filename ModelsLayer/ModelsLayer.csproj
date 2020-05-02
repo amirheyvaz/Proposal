@@ -53,6 +53,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataContext\DataContext.cs" />
+    <Compile Include="Migrations\202005021611138_990212-init.cs" />
+    <Compile Include="Migrations\202005021611138_990212-init.designer.cs">
+      <DependentUpon>202005021611138_990212-init.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\EducationalGroup.cs" />
+    <Compile Include="Models\EducationGrade.cs" />
+    <Compile Include="Models\Faculty.cs" />
+    <Compile Include="Models\PeriodType.cs" />
+    <Compile Include="Models\Professor.cs" />
+    <Compile Include="Models\Student.cs" />
+    <Compile Include="Models\University.cs" />
+    <Compile Include="Models\UniversityRank.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -66,7 +79,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Models\" />
+    <EmbeddedResource Include="Migrations\202005021611138_990212-init.resx">
+      <DependentUpon>202005021611138_990212-init.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
