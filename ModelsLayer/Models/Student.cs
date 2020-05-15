@@ -42,6 +42,11 @@ namespace ModelsLayer.Models
         [ForeignKey("PeriodTypeID")]
         public virtual PeriodType PeriodType { get; set; }
 
+        public Guid? EducationGradeID { get; set; }
+
+        [ForeignKey("EducationGradeID")]
+        public virtual EducationGrade EducationGrade { get; set; }
+
         [Required]
         public Guid FirstGuidingProfessorID { get; set; }
 

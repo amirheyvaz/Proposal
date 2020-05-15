@@ -1,4 +1,5 @@
-﻿using ModelsLayer.Models;
+﻿using InfrastructureLayer.JSONObjects;
+using ModelsLayer.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,5 +11,6 @@ namespace RepositoryLayer.Interfaces
     public interface IStudentRepository : IGenericRepository<Student , Guid>
     {
         bool AuthenticateStudent(string SocialNo, string Password);
+        UserInfoJson GetUserInfo(string username);
     }
 }

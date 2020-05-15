@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using InfrastructureLayer.Interfaces;
+using InfrastructureLayer.JSONObjects;
 
 namespace RepositoryLayer.Repositories
 {
@@ -22,6 +23,22 @@ namespace RepositoryLayer.Repositories
                 return false;
             else
                 return s.Password == Password;
+        }
+
+        public UserInfoJson GetUserInfo(string username)
+        {
+            Student s = SelectBy(p => p.SocialSecurityNumber == username).FirstOrDefault();
+            if (s == null)
+                return null;
+
+            return new UserInfoJson {
+                ID = s.ID,
+                FirstName = s.FirstName,
+                LastName = s.LastName,
+                StudentNumber = s.StudentNumber,
+                SocialSecurityNumber = s.SocialSecurityNumber,
+                Role = "Student"
+            };
         }
     }
 }

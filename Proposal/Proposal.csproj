@@ -156,6 +156,7 @@
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\AuthController.cs" />
+    <Compile Include="Controllers\ProposalController.cs" />
     <Compile Include="Core\IocConfig.cs" />
     <Compile Include="Core\JwtManager.cs" />
     <Compile Include="Filters\AddChallengeOnUnauthorizedResult.cs" />

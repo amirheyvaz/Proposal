@@ -36,11 +36,6 @@ namespace ModelsLayer.Models
 
         public string LatestDegree { get; set; }
 
-        public Guid? EducationGradeID { get; set; }
-
-        [ForeignKey("EducationGradeID")]
-        public virtual EducationGrade EducationGrade { get; set; }
-
         public string MainSpecialty { get; set; }
 
         [Required]
