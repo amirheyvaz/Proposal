@@ -22,8 +22,12 @@ namespace ModelsLayer.Models
 
         public string LastName { get; set; }
 
+        [Required]
+        public string Password { get; set; }
+
         public DateTime DateOfBirth { get; set; }
 
+        [Required]
         public string SocialSecurityNumber { get; set; }
 
         public string BirthCertificateNumber { get; set; }
@@ -31,6 +35,11 @@ namespace ModelsLayer.Models
         public string Email { get; set; }
 
         public string LatestDegree { get; set; }
+
+        public Guid? EducationGradeID { get; set; }
+
+        [ForeignKey("EducationGradeID")]
+        public virtual EducationGrade EducationGrade { get; set; }
 
         public string MainSpecialty { get; set; }
 

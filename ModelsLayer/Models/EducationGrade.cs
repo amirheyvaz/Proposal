@@ -15,6 +15,6 @@ namespace ModelsLayer.Models
         [Required]
         public string Title { get; set; }
 
-        public virtual ICollection<Student> Students { get; set; }
+        public virtual ICollection<Professor> Professors { get; set; }
     }
 }

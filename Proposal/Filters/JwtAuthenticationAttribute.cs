@@ -8,7 +8,7 @@ using System.Web.Http.Filters;
 using Proposal.Core;
 using System.Security.Claims;
 using System.Security.Principal;
-
+using RepositoryLayer.Interfaces;
 
 namespace Proposal.Filters
 {
@@ -62,9 +62,11 @@ namespace Proposal.Filters
 
             string user = username;
             // More validate to check whether username exists in system
-            //var User = IocConfig.Container.GetInstance<IUserRepository>();
-            //if (!User.SelectBy(u => u.UserName == user).Any())
-             //   return false;
+            var StudentRepository = IocConfig.Container.GetInstance<IStudentRepository>();
+            var ProfessorRepository = IocConfig.Container.GetInstance<IProfessorRepository>();
+            if (!StudentRepository.SelectBy(p => p.SocialSecurityNumber == user).Any() && !ProfessorRepository.SelectBy(p => p.SocialSecurityNumber == user).Any())
+                return false;
+            
 
 
             return true;

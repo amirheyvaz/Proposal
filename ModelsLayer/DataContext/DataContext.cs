@@ -50,9 +50,9 @@ namespace ModelsLayer.DataContext
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Faculty>()
-                .HasRequired<Professor>(f => f.Manager)
+                .HasOptional<Professor>(f => f.Manager)
                 .WithMany(g => g.Faculties_Manager)
-                .HasForeignKey<Guid>(a => a.ManagerID)
+                .HasForeignKey<Guid?>(a => a.ManagerID)
                 .WillCascadeOnDelete(false);
 
             modelBuilder.Entity<Professor>()
@@ -68,9 +68,9 @@ namespace ModelsLayer.DataContext
                 .WillCascadeOnDelete(false);
 
             modelBuilder.Entity<EducationalGroup>()
-                .HasRequired<Professor>(p => p.Manager)
+                .HasOptional<Professor>(p => p.Manager)
                 .WithMany(r => r.EducationalGroups_Manager)
-                .HasForeignKey<Guid>(q => q.ManagerID)
+                .HasForeignKey<Guid?>(q => q.ManagerID)
                 .WillCascadeOnDelete(false);
 
             modelBuilder.Entity<Student>()

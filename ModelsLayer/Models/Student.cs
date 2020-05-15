@@ -15,6 +15,9 @@ namespace ModelsLayer.Models
         [Required]
         public string StudentNumber { get; set; }
 
+        [Required]
+        public string Password { get; set; }
+
         public int EnteranceYear { get; set; }
 
         public string Major { get; set; }
@@ -27,6 +30,7 @@ namespace ModelsLayer.Models
 
         public DateTime DateOfBirth { get; set; }
 
+        [Required]
         public string SocialSecurityNumber { get; set; }
 
         public string BirthCertificateNumber { get; set; }
@@ -37,11 +41,6 @@ namespace ModelsLayer.Models
 
         [ForeignKey("PeriodTypeID")]
         public virtual PeriodType PeriodType { get; set; }
-
-        public Guid EducationGradeID { get; set; }
-
-        [ForeignKey("EducationGradeID")]
-        public virtual EducationGrade EducationGrade { get; set; }
 
         [Required]
         public Guid FirstGuidingProfessorID { get; set; }

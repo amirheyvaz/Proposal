@@ -17,7 +17,7 @@ namespace Proposal.Core
         /// </summary>
         private const string Secret = "ERMN05OPLoDvbTTa/QkqLNMI7cPLguaRyHzyg7n5qNBVjQmtBhz4SzYh4NBVCXi3KJHlSXKP+oi2+bXr6CUYTR==";
 
-        public static string GenerateToken(string username, int expireMinutes = 60)
+        public static string GenerateToken(string username, int expireMinutes = 90)
         {
             var symmetricKey = Convert.FromBase64String(Secret);
             var tokenHandler = new JwtSecurityTokenHandler();

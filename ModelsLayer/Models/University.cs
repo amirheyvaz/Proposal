@@ -15,8 +15,7 @@ namespace ModelsLayer.Models
         [Required]
         public string Name { get; set; }
 
-        [Required]
-        public Guid ManagerID { get; set; }
+        public Guid? ManagerID { get; set; }
 
         [ForeignKey("ManagerID")]
         public virtual Professor Manager { get; set; }

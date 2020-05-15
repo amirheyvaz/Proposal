@@ -1,4 +1,5 @@
 ﻿using Proposal.Core;
+using RepositoryLayer.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,19 +34,19 @@ namespace Proposal.Controllers
         private bool CheckUser(string username, string password)
         {
             // should check in the database
-            //var UserRep = IocConfig.Container.GetInstance<IUserRepository>();
+            var StudentRepository = IocConfig.Container.GetInstance<IStudentRepository>();
+            var ProfessorRepository = IocConfig.Container.GetInstance<IProfessorRepository>();
+            if (StudentRepository.AuthenticateStudent(username, password) || ProfessorRepository.AuthenticateProfessor(username , password))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
 
-            //if (UserRep.SelectBy(x => x.UserName == username && x.Password == password).Any())
-            //{
-            //    return true;
-            //}
-            //else
-            //{
-            //    return false;
-            //}
-
-            return true;
 
         }
+
     }
 }
