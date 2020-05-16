@@ -12,8 +12,12 @@ namespace RepositoryLayer.Repositories
 {
     public class StudentRepository : GenericRepository<Student, Guid>, IStudentRepository
     {
-        public StudentRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
+        IProposalRepository ProposalRepository;
+        public StudentRepository(IUnitOfWork unitOfWork ,
+            IProposalRepository IProposalRepository
+            ) : base(unitOfWork)
         {
+            ProposalRepository = IProposalRepository;
         }
 
         public bool AuthenticateStudent(string SocialNo , string Password)
@@ -37,7 +41,8 @@ namespace RepositoryLayer.Repositories
                 LastName = s.LastName,
                 StudentNumber = s.StudentNumber,
                 SocialSecurityNumber = s.SocialSecurityNumber,
-                Role = "Student"
+                Role = "Student",
+                HasProposal = ProposalRepository.SelectBy(q => q.StudentID == s.ID).FirstOrDefault() != null
             };
         }
     }

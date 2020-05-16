@@ -73,12 +73,24 @@
     <Compile Include="Migrations\202005150747170_990226_4.designer.cs">
       <DependentUpon>202005150747170_990226_4.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202005160731245_990227.cs" />
+    <Compile Include="Migrations\202005160731245_990227.designer.cs">
+      <DependentUpon>202005160731245_990227.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\EducationalGroup.cs" />
     <Compile Include="Models\EducationGrade.cs" />
     <Compile Include="Models\Faculty.cs" />
     <Compile Include="Models\PeriodType.cs" />
     <Compile Include="Models\Professor.cs" />
+    <Compile Include="Models\Proposal.cs" />
+    <Compile Include="Models\ProposalComment.cs" />
+    <Compile Include="Models\ProposalKeyword.cs" />
+    <Compile Include="Models\ProposalOperation.cs" />
+    <Compile Include="Models\ProposalStage.cs" />
+    <Compile Include="Models\ProposalStatus.cs" />
+    <Compile Include="Models\ProposalWorkflowHistory.cs" />
+    <Compile Include="Models\ResearchType.cs" />
     <Compile Include="Models\Student.cs" />
     <Compile Include="Models\University.cs" />
     <Compile Include="Models\UniversityRank.cs" />
@@ -109,6 +121,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202005150747170_990226_4.resx">
       <DependentUpon>202005150747170_990226_4.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202005160731245_990227.resx">
+      <DependentUpon>202005160731245_990227.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -68,5 +68,16 @@ namespace ModelsLayer.Models
         [InverseProperty("Professors")]
         [ForeignKey("EducationalGroupID")]
         public virtual EducationalGroup EducationalGroup { get; set; }
+
+        [InverseProperty("FirstJudge")]
+        public virtual ICollection<Proposal> Proposals_FirstJudge { get; set; }
+
+        [InverseProperty("SecondJudge")]
+        public virtual ICollection<Proposal> Proposals_SecondJudge { get; set; }
+
+        public virtual ICollection<ProposalWorkflowHistory> ProposalWorkflowHistories { get; set; }
+
+        public virtual ICollection<ProposalComment> ProposalComments { get; set; }
+
     }
 }

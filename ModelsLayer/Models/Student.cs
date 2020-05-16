@@ -64,5 +64,10 @@ namespace ModelsLayer.Models
         [ForeignKey("FacultyID")]
         public virtual Faculty Faculty { get; set; }
 
+        public virtual ICollection<Proposal> Proposals { get; set; }
+
+        public virtual ICollection<ProposalWorkflowHistory> ProposalWorkflowHistories { get; set; }
+
+        public virtual ICollection<ProposalComment> ProposalComments { get; set; }
     }
 }

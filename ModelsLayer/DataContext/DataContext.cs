@@ -22,6 +22,14 @@ namespace ModelsLayer.DataContext
         public DbSet<University> Universities { set; get; }
         public DbSet<Faculty> Faculties { set; get; }
         public DbSet<EducationalGroup> EducationalGroups { set; get; }
+        public DbSet<Proposal> Proposals { set; get; }
+        public DbSet<ResearchType> ResearchTypes { set; get; }
+        public DbSet<ProposalStage> ProposalStages { set; get; }
+        public DbSet<ProposalStatus> ProposalStatuses { set; get; }
+        public DbSet<ProposalOperation> ProposalOperations { set; get; }
+        public DbSet<ProposalWorkflowHistory> ProposalWorkflowHistories { set; get; }
+        public DbSet<ProposalKeyword> ProposalKeywords { set; get; }
+        public DbSet<ProposalComment> ProposalComments { set; get; }
 
         //
 
@@ -84,6 +92,25 @@ namespace ModelsLayer.DataContext
                 .WithMany(d => d.Students_SecondGuidingProfessor)
                 .HasForeignKey<Guid>(f => f.SecondGuidingProfessorID)
                 .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Proposal>()
+                .HasRequired<ProposalStage>(p => p.ProposalStage)
+                .WithMany(d => d.Proposals)
+                .HasForeignKey<Guid>(g => g.ProposalStageID)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Proposal>()
+                .HasRequired<Professor>(p => p.FirstJudge)
+                .WithMany(w => w.Proposals_FirstJudge)
+                .HasForeignKey<Guid>(g => g.FirstJudgeID)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Proposal>()
+                .HasRequired<Professor>(p => p.SecondJudge)
+                .WithMany(w => w.Proposals_SecondJudge)
+                .HasForeignKey<Guid>(g => g.SecondJudgeID)
+                .WillCascadeOnDelete(false);
+
 
             base.OnModelCreating(modelBuilder);
         }
