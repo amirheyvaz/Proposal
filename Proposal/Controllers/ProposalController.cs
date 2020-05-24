@@ -9,6 +9,7 @@ using Proposal.Filters;
 using RepositoryLayer.Interfaces;
 using Proposal.Core;
 using InfrastructureLayer.JSONObjects;
+using ModelsLayer.Models;
 
 namespace Proposal.Controllers
 {
@@ -38,6 +39,21 @@ namespace Proposal.Controllers
             {
                 //TODO
                 return null;
+            }
+        }
+
+        [HttpGet]
+        [Route("GetAllResearchTypes")]
+        public List<ResearchType> GetAllResearchTypes()
+        {
+            var ReseachTypesRep = IocConfig.Container.GetInstance<IResearchTypeRepository>();
+            if(ReseachTypesRep != null)
+            {
+                return ReseachTypesRep.GetAll().ToList();
+            }
+            else
+            {
+                return new List<ResearchType>();
             }
         }
     }

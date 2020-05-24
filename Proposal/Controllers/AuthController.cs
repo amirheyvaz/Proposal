@@ -11,13 +11,13 @@ using System.Web.Http.Cors;
 
 namespace Proposal.Controllers
 {
+    [AllowAnonymous]
     [RoutePrefix("api/Authentication")]
     [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class AuthController : ApiController
     {
-        [Route("GetToken/{username}/{password}")]
         [HttpPost]
-        [AllowAnonymous]
+        [Route("GetToken/{username}/{password}")]
         public string GetToken(string username, string password)
         {
             if (CheckUser(username, password))
