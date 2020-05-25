@@ -29,14 +29,12 @@ namespace ModelsLayer.Models
         [ForeignKey("ResearchTypeID")]
         public virtual ResearchType ResearchType { get; set; }
 
-        [Required]
-        public Guid FirstJudgeID { get; set; }
+        public Guid? FirstJudgeID { get; set; }
 
         [ForeignKey("FirstJudgeID")]
         public virtual Professor FirstJudge { get; set; }
 
-        [Required]
-        public Guid SecondJudgeID { get; set; }
+        public Guid? SecondJudgeID { get; set; }
 
         [ForeignKey("SecondJudgeID")]
         public virtual Professor SecondJudge { get; set; }
@@ -56,15 +54,17 @@ namespace ModelsLayer.Models
         [Required]
         public bool IsFinalApprove { get; set; }
 
-        public DateTime DefenceMeetingTime { get; set; }
+        public DateTime? DefenceMeetingTime { get; set; }
 
         public virtual ICollection<ProposalWorkflowHistory> WorkflowHistories { get; set; }
 
         public virtual ICollection<ProposalKeyword> ProposalKeywords { get; set; }
 
-        [Required]
-        public byte[] ProposalFile { get; set; }
+        public virtual ICollection<ProposalFile> ProposalFiles { get; set; }
 
         public virtual ICollection<ProposalComment> ProposalComments { get; set; }
+
+        [Required]
+        public bool BothJudgesApproved { get; set; }
     }
 }

@@ -15,6 +15,8 @@ namespace ModelsLayer.Models
     {
         public string Title { get; set; }
 
+        public bool IsDefault { get; set; }
+
         public virtual ICollection<Proposal> Proposals { get; set; }
     }
 }

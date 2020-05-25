@@ -14,6 +14,14 @@ namespace ModelsLayer.Models
     {
         public string Title { get; set; }
 
+        public int Order { get; set; }
+
+        public bool IsFirst { get; set; }
+
+        public bool IsLast { get; set; }
+
+        public bool ApproveType { get; set; }
+
         public virtual ICollection<Proposal> Proposals { get; set; }
 
         public virtual ICollection<ProposalComment> ProposalComments { get; set; }

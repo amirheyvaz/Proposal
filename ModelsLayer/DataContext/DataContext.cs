@@ -30,6 +30,7 @@ namespace ModelsLayer.DataContext
         public DbSet<ProposalWorkflowHistory> ProposalWorkflowHistories { set; get; }
         public DbSet<ProposalKeyword> ProposalKeywords { set; get; }
         public DbSet<ProposalComment> ProposalComments { set; get; }
+        public DbSet<ProposalFile> ProposalFiles { set; get; }
 
         //
 
@@ -100,15 +101,15 @@ namespace ModelsLayer.DataContext
                 .WillCascadeOnDelete(false);
 
             modelBuilder.Entity<Proposal>()
-                .HasRequired<Professor>(p => p.FirstJudge)
+                .HasOptional<Professor>(p => p.FirstJudge)
                 .WithMany(w => w.Proposals_FirstJudge)
-                .HasForeignKey<Guid>(g => g.FirstJudgeID)
+                .HasForeignKey<Guid?>(g => g.FirstJudgeID)
                 .WillCascadeOnDelete(false);
 
             modelBuilder.Entity<Proposal>()
-                .HasRequired<Professor>(p => p.SecondJudge)
+                .HasOptional<Professor>(p => p.SecondJudge)
                 .WithMany(w => w.Proposals_SecondJudge)
-                .HasForeignKey<Guid>(g => g.SecondJudgeID)
+                .HasForeignKey<Guid?>(g => g.SecondJudgeID)
                 .WillCascadeOnDelete(false);
 
 

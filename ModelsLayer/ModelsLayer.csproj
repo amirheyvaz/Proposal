@@ -77,6 +77,30 @@
     <Compile Include="Migrations\202005160731245_990227.designer.cs">
       <DependentUpon>202005160731245_990227.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202005250610237_990305.cs" />
+    <Compile Include="Migrations\202005250610237_990305.designer.cs">
+      <DependentUpon>202005250610237_990305.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202005250628421_990305_2.cs" />
+    <Compile Include="Migrations\202005250628421_990305_2.designer.cs">
+      <DependentUpon>202005250628421_990305_2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202005250636249_990305_3.cs" />
+    <Compile Include="Migrations\202005250636249_990305_3.designer.cs">
+      <DependentUpon>202005250636249_990305_3.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202005250650544_990305_4.cs" />
+    <Compile Include="Migrations\202005250650544_990305_4.designer.cs">
+      <DependentUpon>202005250650544_990305_4.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202005250652560_990305_5.cs" />
+    <Compile Include="Migrations\202005250652560_990305_5.designer.cs">
+      <DependentUpon>202005250652560_990305_5.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202005250808027_990305_6.cs" />
+    <Compile Include="Migrations\202005250808027_990305_6.designer.cs">
+      <DependentUpon>202005250808027_990305_6.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\EducationalGroup.cs" />
     <Compile Include="Models\EducationGrade.cs" />
@@ -85,6 +109,7 @@
     <Compile Include="Models\Professor.cs" />
     <Compile Include="Models\Proposal.cs" />
     <Compile Include="Models\ProposalComment.cs" />
+    <Compile Include="Models\ProposalFile.cs" />
     <Compile Include="Models\ProposalKeyword.cs" />
     <Compile Include="Models\ProposalOperation.cs" />
     <Compile Include="Models\ProposalStage.cs" />
@@ -124,6 +149,24 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202005160731245_990227.resx">
       <DependentUpon>202005160731245_990227.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202005250610237_990305.resx">
+      <DependentUpon>202005250610237_990305.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202005250628421_990305_2.resx">
+      <DependentUpon>202005250628421_990305_2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202005250636249_990305_3.resx">
+      <DependentUpon>202005250636249_990305_3.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202005250650544_990305_4.resx">
+      <DependentUpon>202005250650544_990305_4.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202005250652560_990305_5.resx">
+      <DependentUpon>202005250652560_990305_5.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202005250808027_990305_6.resx">
+      <DependentUpon>202005250808027_990305_6.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

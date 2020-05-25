@@ -1,4 +1,5 @@
-﻿using ModelsLayer.Models;
+﻿using InfrastructureLayer.JSONObjects;
+using ModelsLayer.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,5 +10,6 @@ namespace RepositoryLayer.Interfaces
 {
     public interface IProposalRepository : IGenericRepository<Proposal,Guid>
     {
+        bool SubmitProposal(ProposalGeneralInfoJSON ProposalJSON, string Username);
     }
 }

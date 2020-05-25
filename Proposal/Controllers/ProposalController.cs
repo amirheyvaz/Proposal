@@ -13,6 +13,7 @@ using ModelsLayer.Models;
 
 namespace Proposal.Controllers
 {
+    
     [JwtAuthentication]
     [RoutePrefix("api/Proposal")]
     [EnableCors(origins: "*", headers: "*", methods: "*")]
@@ -54,6 +55,21 @@ namespace Proposal.Controllers
             else
             {
                 return new List<ResearchType>();
+            }
+        }
+
+        [HttpPost]
+        [Route("UploadProposal/{username}")]
+        public bool UploadProposal(string username , [FromBody] ProposalGeneralInfoJSON Proposal)
+        {
+            try
+            {
+                var ProposalRep = IocConfig.Container.GetInstance<IProposalRepository>();
+                return ProposalRep.SubmitProposal(Proposal, username);
+            }
+            catch (Exception e)
+            {
+                return false;
             }
         }
     }
