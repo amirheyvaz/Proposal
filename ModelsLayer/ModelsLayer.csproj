@@ -101,6 +101,14 @@
     <Compile Include="Migrations\202005250808027_990305_6.designer.cs">
       <DependentUpon>202005250808027_990305_6.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202006030503146_990313.cs" />
+    <Compile Include="Migrations\202006030503146_990313.designer.cs">
+      <DependentUpon>202006030503146_990313.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202006030505245_990313_1.cs" />
+    <Compile Include="Migrations\202006030505245_990313_1.designer.cs">
+      <DependentUpon>202006030505245_990313_1.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\EducationalGroup.cs" />
     <Compile Include="Models\EducationGrade.cs" />
@@ -167,6 +175,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202005250808027_990305_6.resx">
       <DependentUpon>202005250808027_990305_6.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202006030503146_990313.resx">
+      <DependentUpon>202006030503146_990313.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202006030505245_990313_1.resx">
+      <DependentUpon>202006030505245_990313_1.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

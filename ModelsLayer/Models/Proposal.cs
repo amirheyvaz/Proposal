@@ -65,6 +65,9 @@ namespace ModelsLayer.Models
         public virtual ICollection<ProposalComment> ProposalComments { get; set; }
 
         [Required]
-        public bool BothJudgesApproved { get; set; }
+        public bool FirstJudgeApproved { get; set; }
+
+        [Required]
+        public bool SecondJudgeApproved { get; set; }
     }
 }

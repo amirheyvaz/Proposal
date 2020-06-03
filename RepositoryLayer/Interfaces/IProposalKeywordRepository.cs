@@ -10,5 +10,6 @@ namespace RepositoryLayer.Interfaces
     public interface IProposalKeywordRepository : IGenericRepository<ProposalKeyword , Guid>
     {
         bool AddProposalKeyword(List<string> keys, Guid ProposalID);
+        List<string> GetProposalKeywords(Guid ProposalID);
     }
 }

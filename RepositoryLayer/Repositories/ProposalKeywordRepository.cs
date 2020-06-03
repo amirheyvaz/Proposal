@@ -54,5 +54,10 @@ namespace RepositoryLayer.Repositories
             
 
         }
+
+        public List<string> GetProposalKeywords(Guid ProposalID)
+        {
+            return SelectBy(p => p.ProposalID == ProposalID).Select(q => q.Title).ToList();
+        }
     }
 }

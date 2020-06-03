@@ -8,9 +8,8 @@ using System.Threading.Tasks;
 
 namespace RepositoryLayer.Interfaces
 {
-    public interface IProposalRepository : IGenericRepository<Proposal,Guid>
+    public interface IProposalCommentRepository : IGenericRepository<ProposalComment , Guid>
     {
-        bool SubmitProposal(ProposalGeneralInfoJSON ProposalJSON, string Username);
-        ProposalJSON GetProposalByStudentID(Guid StudentID);
+        List<ProposalCommentJSON> GetAllProposalComments(Guid ProposalID);
     }
 }

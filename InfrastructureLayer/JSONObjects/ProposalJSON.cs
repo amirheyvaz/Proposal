@@ -8,6 +8,8 @@ namespace InfrastructureLayer.JSONObjects
 {
     public class ProposalJSON
     {
+        public Guid ID { get; set; }
+
         public string Name { get; set; }
 
         public string LatinName { get; set; }
@@ -52,7 +54,9 @@ namespace InfrastructureLayer.JSONObjects
 
         public List<string> Keywords { get; set; }
 
-        public bool BothJudgesApproved { get; set; }
+        public bool FirstJudgeApproved { get; set; }
+
+        public bool SecondJudgeApproved { get; set; }
 
         public List<ProposalWorkflowHistoryJSON> WorkflowHistories { get; set; }
 
