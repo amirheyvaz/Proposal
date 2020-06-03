@@ -22,5 +22,27 @@ namespace InfrastructureLayer.JSONObjects
 
         public bool HasProposal { get; set; }
 
+        /// <summary>
+        /// درجه استاد
+        /// 0 = استاد ساده
+        /// 1 = داور
+        /// 2 = استاد راهنما
+        /// 3 = مدیر گروه
+        /// 4 = عضو شورا
+        /// 5 = رئیس دانشکده
+        /// 6 = رئیس دانشگاه
+        /// </summary>
+        public int ProfessorDegree { set; get; }
+
+        public string EducationalGroupTitle { get; set; }
+
+        public string UniversityRankTitle { get; set; }
+
+        public string LatestDegree { get; set; }
+
+        public string MainSpecialty { get; set; }
+
+        public string FacultyName { get; set; }
+
     }
 }

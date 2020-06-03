@@ -9,6 +9,7 @@ using InfrastructureLayer.Interfaces;
 using InfrastructureLayer.JSONObjects;
 using InfrastructureLayer.Utilities;
 
+
 namespace RepositoryLayer.Repositories
 {
     public class ProposalRepository : GenericRepository<Proposal, Guid>, IProposalRepository
@@ -19,13 +20,15 @@ namespace RepositoryLayer.Repositories
         IProposalStatusRepository StatusRepository;
         IProposalCommentRepository ProposalCommentRepository;
         IProposalWorkflowHistoryRepository ProposalWorkflowHistoryRepository;
+        IProposalFileRepository ProposalFileRepository;
         public ProposalRepository(IUnitOfWork unitOfWork ,
             IProposalKeywordRepository IProposalKeywordRepository,
             Lazy<IStudentRepository> IStudentRepository,
             IProposalStageRepository IProposalStageRepository,
             IProposalStatusRepository IProposalStatusRepository,
             IProposalCommentRepository IProposalCommentRepository,
-            IProposalWorkflowHistoryRepository IProposalWorkflowHistoryRepository
+            IProposalWorkflowHistoryRepository IProposalWorkflowHistoryRepository,
+            IProposalFileRepository IProposalFileRepository
             ) : base(unitOfWork)
         {
             KeywordRepository = IProposalKeywordRepository;
@@ -34,6 +37,7 @@ namespace RepositoryLayer.Repositories
             StatusRepository = IProposalStatusRepository;
             ProposalCommentRepository = IProposalCommentRepository;
             ProposalWorkflowHistoryRepository = IProposalWorkflowHistoryRepository;
+            ProposalFileRepository = IProposalFileRepository;
         }
 
         public bool SubmitProposal(ProposalGeneralInfoJSON ProposalJSON , string Username)
@@ -65,6 +69,18 @@ namespace RepositoryLayer.Repositories
                     Add(p);
 
                     result &= KeywordRepository.AddProposalKeyword(ProposalJSON.keywords, p.ID);
+
+                    //WorkFlow
+                    ProposalWorkflowHistory work = new ProposalWorkflowHistory {
+                        ID = Guid.NewGuid(),
+                        OccuranceDate = DateTime.Now,
+                        OccuredByProfessorID = null,
+                        OccuredByStudentID = s.ID,
+                        ProposalID = p.ID,
+                        ProposalOperationID = Guid.Parse("4aaaa946-53ce-45c8-a317-20eba03867e0")
+                    };
+                    ProposalWorkflowHistoryRepository.Add(work);
+                    //
                     
                     Commit();
                     dbContextTransaction.Commit();
@@ -112,6 +128,40 @@ namespace RepositoryLayer.Repositories
                 Comments = ProposalCommentRepository.GetAllProposalComments(p.ID),
                 WorkflowHistories = ProposalWorkflowHistoryRepository.GetAllHistories(p.ID)
             }).FirstOrDefault();
+        }
+
+        public bool DeleteProposal(Guid ProposalID)
+        {
+            using (var transaction = Context.Database.BeginTransaction()) {
+                try
+                {
+
+                    var keywords = KeywordRepository.SelectBy(k => k.ProposalID == ProposalID);
+                    KeywordRepository.DeleteRange(keywords.ToList());
+
+                    var comments = ProposalCommentRepository.SelectBy(c => c.ProposalID == ProposalID);
+                    ProposalCommentRepository.DeleteRange(comments.ToList());
+
+                    var histories = ProposalWorkflowHistoryRepository.SelectBy(h => h.ProposalID == ProposalID);
+                    ProposalWorkflowHistoryRepository.DeleteRange(histories.ToList());
+
+                    var proposalFiles = ProposalFileRepository.SelectBy(f => f.ProposalID == ProposalID);
+                    ProposalFileRepository.DeleteRange(proposalFiles.ToList());
+
+                    DeleteById(ProposalID);
+
+                    Commit();
+                    transaction.Commit();
+                    transaction.Dispose();
+                    return true;
+                }catch(Exception e)
+                {
+                    transaction.Rollback();
+                    transaction.Dispose();
+                    return false;
+                }
+
+            }
         }
     }
 }

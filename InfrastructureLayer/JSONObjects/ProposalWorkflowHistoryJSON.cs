@@ -23,5 +23,7 @@ namespace InfrastructureLayer.JSONObjects
         public Guid OccuredByPersonID { get; set; }
 
         public string OccuredByPersonName { get; set; }
+
+        public string OccuranceDate { get; set; }
     }
 }

@@ -270,6 +270,27 @@ namespace RepositoryLayer.Repositories
             }
         }
 
+        public virtual bool DeleteRange(List<T> entities, bool autoSave = true)
+        {
+            try
+            {
+
+                foreach(var entity in entities)
+                {
+                    _unitOfWork.Set<T>().Remove(entity);
+                }
+
+                if (autoSave)
+                    Commit();
+
+                return true;
+            }
+            catch (Exception exp)
+            {
+                return false;
+            }
+        }
+
         public virtual async void DeleteAsync(T entity)
         {
             _unitOfWork.Set<T>().Remove(entity);

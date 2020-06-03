@@ -27,6 +27,7 @@ namespace RepositoryLayer.Interfaces
         void UpdateAsync(T entity);
         bool Delete(T entity, bool autoSave = true);
         void DeleteAsync(T entity);
+        bool DeleteRange(List<T> entities, bool autoSave = true);
         bool DeleteById(PKey id, bool autoSave = true);
         void DeleteByIdAsync(PKey id);
         ColumnType GetColumnValue<ColumnType>(Expression<Func<T, bool>> predicate, string columnName = "Id");

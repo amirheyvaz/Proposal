@@ -12,5 +12,6 @@ namespace RepositoryLayer.Interfaces
     {
         bool SubmitProposal(ProposalGeneralInfoJSON ProposalJSON, string Username);
         ProposalJSON GetProposalByStudentID(Guid StudentID);
+        bool DeleteProposal(Guid ProposalID);
     }
 }
