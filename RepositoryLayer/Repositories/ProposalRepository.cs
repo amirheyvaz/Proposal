@@ -16,6 +16,7 @@ namespace RepositoryLayer.Repositories
     {
         IProposalKeywordRepository KeywordRepository;
         Lazy<IStudentRepository> StudentRepository;
+        Lazy<IProfessorRepository> ProfessorRepository;
         IProposalStageRepository StageRepository;
         IProposalStatusRepository StatusRepository;
         IProposalCommentRepository ProposalCommentRepository;
@@ -28,7 +29,8 @@ namespace RepositoryLayer.Repositories
             IProposalStatusRepository IProposalStatusRepository,
             IProposalCommentRepository IProposalCommentRepository,
             IProposalWorkflowHistoryRepository IProposalWorkflowHistoryRepository,
-            IProposalFileRepository IProposalFileRepository
+            IProposalFileRepository IProposalFileRepository,
+            Lazy<IProfessorRepository> IProfessorRepository
             ) : base(unitOfWork)
         {
             KeywordRepository = IProposalKeywordRepository;
@@ -38,6 +40,7 @@ namespace RepositoryLayer.Repositories
             ProposalCommentRepository = IProposalCommentRepository;
             ProposalWorkflowHistoryRepository = IProposalWorkflowHistoryRepository;
             ProposalFileRepository = IProposalFileRepository;
+            ProfessorRepository = IProfessorRepository;
         }
 
         public bool SubmitProposal(ProposalGeneralInfoJSON ProposalJSON , string Username)
@@ -126,7 +129,9 @@ namespace RepositoryLayer.Repositories
                 SecondJudgeApproved = p.SecondJudgeApproved,
                 Keywords = KeywordRepository.GetProposalKeywords(p.ID),
                 Comments = ProposalCommentRepository.GetAllProposalComments(p.ID),
-                WorkflowHistories = ProposalWorkflowHistoryRepository.GetAllHistories(p.ID)
+                WorkflowHistories = ProposalWorkflowHistoryRepository.GetAllHistories(p.ID),
+                Deletable = ProposalWorkflowHistoryRepository.GetAllHistories(p.ID).Count < 2,
+                Sendable = p.ProposalStage.Order == 1 || p.ProposalStage.Order == 4 || p.ProposalStage.Order == 7 || p.ProposalStage.Order == 11
             }).FirstOrDefault();
         }
 
@@ -161,6 +166,110 @@ namespace RepositoryLayer.Repositories
                     return false;
                 }
 
+            }
+        }
+
+        public List<ProposalJSON> GetAllProfessorProposals(Guid ProfessorID)
+        {
+            List<Proposal> proposals = new List<Proposal>();
+            Professor pro = ProfessorRepository.Value.Get(ProfessorID);
+
+            proposals.AddRange(SelectBy(p => p.Student.FacultyID == pro.FacultyID && (p.ProposalStage.Order == 3 || p.ProposalStage.Order == 5 || p.ProposalStage.Order == 9)  && ((p.FirstJudgeID == ProfessorID && !p.FirstJudgeApproved )|| (p.SecondJudgeID == ProfessorID && !p.SecondJudgeApproved))));
+            proposals.AddRange(SelectBy(p => p.Student.FacultyID == pro.FacultyID && (p.Student.FirstGuidingProfessorID == ProfessorID || p.Student.SecondGuidingProfessorID == ProfessorID) && (p.ProposalStage.Order == 8 || p.ProposalStage.Order == 12)));
+            if (pro.EducationalGroups_Manager.Any())
+            {
+                List<Guid> FacultyIDs = pro.EducationalGroups_Manager.Select(m => m.FacultyID).ToList();
+                proposals.AddRange(SelectBy(p => p.ProposalStage.Order == 2 && FacultyIDs.Contains(p.Student.FacultyID)));
+            }
+            if (pro.IsCouncilMember)
+            {
+                proposals.AddRange(SelectBy(p => p.ProposalStage.Order == 10 && p.Student.FacultyID == pro.FacultyID));
+            }
+
+            return proposals.AsEnumerable().Select(p => new ProposalJSON
+             {
+                 ID = p.ID,
+                 Name = p.Name,
+                 LatinName = p.LatinName,
+                 CreateDate = p.CreateDate.GregorianToShamsi(),
+                 StudentFullName = p.Student.FirstName + " " + p.Student.LastName,
+                 StudentID = p.StudentID,
+                 StudentSocialSecurityNumber = p.Student.SocialSecurityNumber,
+                 ReseachTypeID = p.ResearchTypeID,
+                 ReseachTypeTitle = p.ResearchType.Title,
+                 FirstJudgeID = p.FirstJudgeID.HasValue ? p.FirstJudgeID.Value : Guid.Empty,
+                 FirstJudgeFullName = p.FirstJudgeID.HasValue ? p.FirstJudge.FirstName + " " + p.FirstJudge.LastName : "",
+                 FirstJudgeSocialSecurityNumber = p.FirstJudgeID.HasValue ? p.FirstJudge.SocialSecurityNumber : "",
+                 SecondJudgeID = p.SecondJudgeID.HasValue ? p.SecondJudgeID.Value : Guid.Empty,
+                 SecondJudgeFullName = p.SecondJudgeID.HasValue ? p.SecondJudge.FirstName + " " + p.SecondJudge.LastName : "",
+                 SecondJudgeSocialSecurityNumber = p.SecondJudgeID.HasValue ? p.SecondJudge.SocialSecurityNumber : "",
+                 ProposalStageID = p.ProposalStageID,
+                 ProposalStageTitle = p.ProposalStage.Title,
+                 LatestOperation = p.LatestOperation,
+                 ProposalStatusID = p.ProposalStatusID,
+                 ProposalStatusTitle = p.ProposalStatus.Title,
+                 IsFinalApprove = p.IsFinalApprove,
+                 DefenceMeetingTime = p.DefenceMeetingTime.HasValue ? p.DefenceMeetingTime.Value.GregorianToShamsi() : "",
+                 FirstJudgeApproved = p.FirstJudgeApproved,
+                 SecondJudgeApproved = p.SecondJudgeApproved,
+                 Keywords = KeywordRepository.GetProposalKeywords(p.ID),
+                 Comments = ProposalCommentRepository.GetAllProposalComments(p.ID),
+                 WorkflowHistories = ProposalWorkflowHistoryRepository.GetAllHistories(p.ID),
+                 WaitingForJudgeApprovement = /*(!p.FirstJudgeApproved || !p.SecondJudgeApproved) && */ (p.ProposalStage.Order == 3 || p.ProposalStage.Order == 5 || p.ProposalStage.Order == 9),
+                 WaitingForJudgeAssignment = p.ProposalStage.Order == 2,
+                 WaitingForGuidingProfessorApprovement = (p.ProposalStage.Order == 8 || p.ProposalStage.Order == 12),
+                 WaitingForCouncilApprovement = p.ProposalStage.Order == 10
+            }).ToList();
+        }
+
+        public string SendProposal(Guid ID)
+        {
+            
+            using (var dbContextTransaction = Context.Database.BeginTransaction())
+            {
+                try
+                {
+                    var proposal = Get(ID);
+                    if (proposal == null)
+                        return "اطلاعات پروپوزال اشتباه است";
+                    if (proposal.ProposalStage.Order != 1 && proposal.ProposalStage.Order != 4 && proposal.ProposalStage.Order != 7 && proposal.ProposalStage.Order != 11)
+                        return "پروپوزال در دست بررسی این کاربر قرار نیست";
+
+                    var currentStage = StageRepository.Get(proposal.ProposalStageID);
+                    if (currentStage != null)
+                    {
+                        var nextStage = StageRepository.SelectBy(p => p.Order == currentStage.Order + 1).FirstOrDefault();
+                        if (nextStage != null)
+                        {
+                            proposal.ProposalStageID = nextStage.ID;
+                            //WorkFlow
+                            ProposalWorkflowHistory work = new ProposalWorkflowHistory
+                            {
+                                ID = Guid.NewGuid(),
+                                OccuranceDate = DateTime.Now,
+                                OccuredByProfessorID = null,
+                                OccuredByStudentID = proposal.StudentID,
+                                ProposalID = proposal.ID,
+                                ProposalOperationID = Guid.Parse("B56DBC09-DDFA-4003-89EC-CED81CD31F7C")
+                            };
+                            ProposalWorkflowHistoryRepository.Add(work);
+                            //
+                        }
+                    }
+                   
+
+                    Commit();
+                    dbContextTransaction.Commit();
+                    dbContextTransaction.Dispose();
+
+                    return "";
+                }
+                catch (Exception e)
+                {
+                    dbContextTransaction.Rollback();
+                    dbContextTransaction.Dispose();
+                    return "خطا در سرور";
+                }
             }
         }
     }

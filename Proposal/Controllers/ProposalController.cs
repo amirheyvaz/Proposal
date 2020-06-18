@@ -100,5 +100,27 @@ namespace Proposal.Controllers
             }
         }
 
+
+        [HttpGet]
+        [Route("GetWaitingForActionProposals/{ProfessorUsername}")]
+        public List<ProposalJSON> GetWaitingForActionProposals(string ProfessorUsername)
+        {
+            var ProfessorRepository = IocConfig.Container.GetInstance<IProfessorRepository>();
+            var ProposalRepository = IocConfig.Container.GetInstance<IProposalRepository>();
+
+            var Professor = ProfessorRepository.SelectBy(p => p.SocialSecurityNumber == ProfessorUsername).FirstOrDefault();
+            if (Professor == null)
+                throw new HttpResponseException(HttpStatusCode.NotFound);
+
+            return ProposalRepository.GetAllProfessorProposals(Professor.ID);
+        }
+
+        [HttpGet]
+        [Route("SendProposal/{ProposalID}")]
+        public string SendProposal (Guid ProposalID)
+        {
+            var ProposalRepository = IocConfig.Container.GetInstance<IProposalRepository>();
+            return ProposalRepository.SendProposal(ProposalID);
+        }
     }
 }

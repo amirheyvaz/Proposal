@@ -61,5 +61,17 @@ namespace InfrastructureLayer.JSONObjects
         public List<ProposalWorkflowHistoryJSON> WorkflowHistories { get; set; }
 
         public List<ProposalCommentJSON> Comments { get; set; }
+
+        public bool WaitingForJudgeAssignment { get; set; }
+
+        public bool WaitingForJudgeApprovement { get; set; }
+
+        public bool WaitingForGuidingProfessorApprovement { get; set; }
+
+        public bool WaitingForCouncilApprovement { get; set; }
+
+        public bool Deletable { get; set; }
+
+        public bool Sendable { get; set; }
     }
 }
