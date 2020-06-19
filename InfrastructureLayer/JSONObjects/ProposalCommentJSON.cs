@@ -27,5 +27,7 @@ namespace InfrastructureLayer.JSONObjects
         public string StageTitle { get; set; }
 
         public int ImportanceLevel { get; set; }
+
+        public string Content { get; set; }
     }
 }

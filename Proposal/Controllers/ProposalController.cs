@@ -117,10 +117,57 @@ namespace Proposal.Controllers
 
         [HttpGet]
         [Route("SendProposal/{ProposalID}")]
-        public string SendProposal (Guid ProposalID)
+        public string SendProposal (Guid ProposalID , [FromBody] ProposalCommentJSON comment)
         {
             var ProposalRepository = IocConfig.Container.GetInstance<IProposalRepository>();
-            return ProposalRepository.SendProposal(ProposalID);
+            ProposalComment p = new ProposalComment {
+                Content = comment.Content,
+                ImportanceLevel = comment.ImportanceLevel
+            };
+            return ProposalRepository.SendProposal(ProposalID , p);
+        }
+
+        [HttpPost]
+        [Route("ApproveProposal/{ProposalID}/{ProfessorID}")]
+        public string ApproveProposal (Guid ProposalID , Guid ProfessorID, [FromBody] ProposalCommentJSON comment)
+        {
+            var ProposalRepository = IocConfig.Container.GetInstance<IProposalRepository>();
+            ProposalComment p = new ProposalComment
+            {
+                Content = comment.Content,
+                ImportanceLevel = comment.ImportanceLevel
+            };
+            return ProposalRepository.ApproveProposal(ProposalID , ProfessorID , p);
+        }
+
+        [HttpPost]
+        [Route("RejectProposal/{ProposalID}/{ProfessorID}/{BigChanges:bool?}")]
+        public string RejectProposal(Guid ProposalID, Guid ProfessorID, [FromBody] ProposalCommentJSON comment , bool BigChanges = true )
+        {
+            var ProposalRepository = IocConfig.Container.GetInstance<IProposalRepository>();
+            ProposalComment p = new ProposalComment
+            {
+                Content = comment.Content,
+                ImportanceLevel = comment.ImportanceLevel
+            };
+            return ProposalRepository.RejectProposal(ProposalID, ProfessorID, p , BigChanges);
+        }
+
+
+        [HttpGet]
+        [Route("GetAllProfessors")]
+        public List<ComboBoxJSON> GetAllProfessors()
+        {
+            var ProfessorRepository = IocConfig.Container.GetInstance<IProfessorRepository>();
+            return ProfessorRepository.GetAllProfessors();
+        }
+
+        [HttpGet]
+        [Route("AsignJudges/{ProposalID}/{FirstJudgeID}/{SecondJudgeID}")]
+        public string AssignJudges(Guid ProposalID , Guid FirstJudgeID , Guid SecondJudgeID)
+        {
+            var ProposalRepository = IocConfig.Container.GetInstance<IProposalRepository>();
+            return ProposalRepository.AssignJudges(ProposalID , FirstJudgeID , SecondJudgeID);
         }
     }
 }

@@ -52,5 +52,15 @@ namespace RepositoryLayer.Repositories
                     FacultyName = p.Faculty.Name
                 }).FirstOrDefault();
         }
+
+        public List<ComboBoxJSON> GetAllProfessors()
+        {
+            return GetAll().Select(
+                p => new ComboBoxJSON {
+                    ID = p.ID,
+                    Title = p.FirstName + " " + p.LastName
+                }
+            ).ToList();
+        }
     }
 }

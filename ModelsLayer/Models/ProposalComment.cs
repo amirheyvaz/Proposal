@@ -15,6 +15,9 @@ namespace ModelsLayer.Models
         [Required]
         public Guid ProposalID { get; set; }
 
+        [Required]
+        public string Content { get; set; }
+
         [ForeignKey("ProposalID")]
         public virtual Proposal Proposal { get; set; }
 

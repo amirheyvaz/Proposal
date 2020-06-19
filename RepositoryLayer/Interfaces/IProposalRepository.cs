@@ -14,6 +14,9 @@ namespace RepositoryLayer.Interfaces
         ProposalJSON GetProposalByStudentID(Guid StudentID);
         bool DeleteProposal(Guid ProposalID);
         List<ProposalJSON> GetAllProfessorProposals(Guid ProfessorID);
-        string SendProposal(Guid ID);
+        string SendProposal(Guid ID, ProposalComment comment);
+        string ApproveProposal(Guid ID, Guid ProfessorID, ProposalComment comment);
+        string RejectProposal(Guid ID, Guid ProfessorID, ProposalComment comment, bool BigChanges = true);
+        string AssignJudges(Guid ProposalID, Guid FirstJudgeID, Guid SecondJudgeID);
     }
 }

@@ -8,6 +8,8 @@ namespace InfrastructureLayer.JSONObjects
 {
     public class ProposalJSON
     {
+        public int RowNumber { get; set; }
+
         public Guid ID { get; set; }
 
         public string Name { get; set; }
@@ -39,6 +41,8 @@ namespace InfrastructureLayer.JSONObjects
         public string SecondJudgeSocialSecurityNumber { get; set; }
 
         public Guid ProposalStageID { get; set; }
+
+        public int ProposalStageOrder { get; set; }
 
         public string ProposalStageTitle { get; set; }
 

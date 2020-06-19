@@ -69,5 +69,11 @@ namespace ModelsLayer.Models
 
         [Required]
         public bool SecondJudgeApproved { get; set; }
+
+        /// <summary>
+        /// تغییرات کلی را برای بررسی داوران مشخص می کند
+        /// در غیر این صورت در دست بررسی استاد راهنما قرار می گیرد
+        /// </summary>
+        public bool? BigChangesForJudges { get; set; }
     }
 }

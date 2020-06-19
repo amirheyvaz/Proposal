@@ -12,5 +12,6 @@ namespace RepositoryLayer.Interfaces
     {
         bool AuthenticateProfessor(string SocialNo, string Password);
         UserInfoJson GetUserInfo(string username);
+        List<ComboBoxJSON> GetAllProfessors();
     }
 }

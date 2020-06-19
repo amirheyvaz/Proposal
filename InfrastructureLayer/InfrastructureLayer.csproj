@@ -55,6 +55,7 @@
     <Compile Include="AbstractModels\TEntity.cs" />
     <Compile Include="Interfaces\IEntity.cs" />
     <Compile Include="Interfaces\IUnitOfWork.cs" />
+    <Compile Include="JSONObjects\ComboBoxJSON.cs" />
     <Compile Include="JSONObjects\KeywordJSON.cs" />
     <Compile Include="JSONObjects\ProposalCommentJSON.cs" />
     <Compile Include="JSONObjects\ProposalGeneralInfoJSON.cs" />

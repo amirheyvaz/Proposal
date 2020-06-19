@@ -109,6 +109,10 @@
     <Compile Include="Migrations\202006030505245_990313_1.designer.cs">
       <DependentUpon>202006030505245_990313_1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202006191500456_990330.cs" />
+    <Compile Include="Migrations\202006191500456_990330.designer.cs">
+      <DependentUpon>202006191500456_990330.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\EducationalGroup.cs" />
     <Compile Include="Models\EducationGrade.cs" />
@@ -181,6 +185,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202006030505245_990313_1.resx">
       <DependentUpon>202006030505245_990313_1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202006191500456_990330.resx">
+      <DependentUpon>202006191500456_990330.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

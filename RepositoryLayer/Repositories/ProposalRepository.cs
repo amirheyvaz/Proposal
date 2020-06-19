@@ -186,8 +186,9 @@ namespace RepositoryLayer.Repositories
                 proposals.AddRange(SelectBy(p => p.ProposalStage.Order == 10 && p.Student.FacultyID == pro.FacultyID));
             }
 
-            return proposals.AsEnumerable().Select(p => new ProposalJSON
+            return proposals.AsEnumerable().Select((p,index) => new ProposalJSON
              {
+                 RowNumber = index + 1,
                  ID = p.ID,
                  Name = p.Name,
                  LatinName = p.LatinName,
@@ -204,7 +205,8 @@ namespace RepositoryLayer.Repositories
                  SecondJudgeFullName = p.SecondJudgeID.HasValue ? p.SecondJudge.FirstName + " " + p.SecondJudge.LastName : "",
                  SecondJudgeSocialSecurityNumber = p.SecondJudgeID.HasValue ? p.SecondJudge.SocialSecurityNumber : "",
                  ProposalStageID = p.ProposalStageID,
-                 ProposalStageTitle = p.ProposalStage.Title,
+                 ProposalStageTitle = "در انتظار اقدام " + p.ProposalStage.Title,
+                 ProposalStageOrder = p.ProposalStage.Order,
                  LatestOperation = p.LatestOperation,
                  ProposalStatusID = p.ProposalStatusID,
                  ProposalStatusTitle = p.ProposalStatus.Title,
@@ -222,7 +224,7 @@ namespace RepositoryLayer.Repositories
             }).ToList();
         }
 
-        public string SendProposal(Guid ID)
+        public string SendProposal(Guid ID , ProposalComment comment)
         {
             
             using (var dbContextTransaction = Context.Database.BeginTransaction())
@@ -231,17 +233,43 @@ namespace RepositoryLayer.Repositories
                 {
                     var proposal = Get(ID);
                     if (proposal == null)
+                    {
+                        dbContextTransaction.Rollback();
+                        dbContextTransaction.Dispose();
                         return "اطلاعات پروپوزال اشتباه است";
+                    }
+                        
                     if (proposal.ProposalStage.Order != 1 && proposal.ProposalStage.Order != 4 && proposal.ProposalStage.Order != 7 && proposal.ProposalStage.Order != 11)
+                    {
+                        dbContextTransaction.Rollback();
+                        dbContextTransaction.Dispose();
                         return "پروپوزال در دست بررسی این کاربر قرار نیست";
+                    }
+                        
 
                     var currentStage = StageRepository.Get(proposal.ProposalStageID);
                     if (currentStage != null)
                     {
-                        var nextStage = StageRepository.SelectBy(p => p.Order == currentStage.Order + 1).FirstOrDefault();
+                        ProposalStage nextStage = null;
+                        if (currentStage.Order == 1 || currentStage.Order == 4 || currentStage.Order == 11)
+                            nextStage = StageRepository.SelectBy(p => p.Order == currentStage.Order + 1).FirstOrDefault();
+                        else if(currentStage.Order == 7)
+                        {
+                            if (proposal.BigChangesForJudges.HasValue && proposal.BigChangesForJudges.Value)
+                            {
+                                nextStage = StageRepository.SelectBy(p => p.Order == 9).FirstOrDefault();
+                            }
+                            else
+                            {
+                                nextStage = StageRepository.SelectBy(p => p.Order == 8).FirstOrDefault();
+                            }
+                        }
+
                         if (nextStage != null)
                         {
+                            
                             proposal.ProposalStageID = nextStage.ID;
+                            proposal.LatestOperation = "ارسال شده توسط دانشجو";
                             //WorkFlow
                             ProposalWorkflowHistory work = new ProposalWorkflowHistory
                             {
@@ -254,9 +282,466 @@ namespace RepositoryLayer.Repositories
                             };
                             ProposalWorkflowHistoryRepository.Add(work);
                             //
+                            //Comment
+                            ProposalComment com = new ProposalComment
+                            {
+                                ID = Guid.NewGuid(),
+                                ImportanceLevel = comment.ImportanceLevel,
+                                Content = comment.Content,
+                                OccuranceDate = DateTime.Now,
+                                OccuredByProfessorID = null,
+                                OccuredByStudentID = proposal.StudentID,
+                                ProposalID = proposal.ID,
+                                ProposalStageID = currentStage.ID
+                            };
+                            ProposalCommentRepository.Add(com);
+                            //
                         }
                     }
                    
+
+                    Commit();
+                    dbContextTransaction.Commit();
+                    dbContextTransaction.Dispose();
+
+                    return "";
+                }
+                catch (Exception e)
+                {
+                    dbContextTransaction.Rollback();
+                    dbContextTransaction.Dispose();
+                    return "خطا در سرور";
+                }
+            }
+        }
+
+        public string ApproveProposal(Guid ID , Guid ProfessorID , ProposalComment comment)
+        {
+            using (var dbContextTransaction = Context.Database.BeginTransaction())
+            {
+                try
+                {
+                    var proposal = Get(ID);
+                    if (proposal == null)
+                    {
+                        dbContextTransaction.Rollback();
+                        dbContextTransaction.Dispose();
+                        return "اطلاعات پروپوزال اشتباه است";
+                    }
+                       
+                    if (proposal.ProposalStage.Order != 3 && proposal.ProposalStage.Order != 5 && proposal.ProposalStage.Order != 6 && proposal.ProposalStage.Order != 8 && proposal.ProposalStage.Order != 9 && proposal.ProposalStage.Order != 10 && proposal.ProposalStage.Order != 12)
+                    {
+                        dbContextTransaction.Rollback();
+                        dbContextTransaction.Dispose();
+                        return "پروپوزال در دست بررسی این کاربر قرار نیست";
+                    }
+                       
+
+                    var currentStage = StageRepository.Get(proposal.ProposalStageID);
+                    if (currentStage != null)
+                    {
+                        ProposalStage nextStage = null;
+                       
+                            
+                        //5 ==> 6
+                        //9 ==> 10
+                        //3 ==> 6
+                        //6 ==> 10
+                        //8 ==> 10
+                        //10 ==> 13 FA
+                        //12 ==> 10
+                        switch (currentStage.Order)
+                        {
+                            case 3:
+                                {
+                                    if(proposal.FirstJudgeID == ProfessorID)
+                                    {
+                                        proposal.FirstJudgeApproved = true;
+                                    }
+                                    else if(proposal.SecondJudgeID == ProfessorID)
+                                    {
+                                        proposal.SecondJudgeApproved = true;
+                                    }
+                                    if(proposal.SecondJudgeApproved && proposal.FirstJudgeApproved)
+                                    {
+                                        nextStage = StageRepository.SelectBy(p => p.Order == 6).FirstOrDefault();
+                                        proposal.FirstJudgeApproved = false;
+                                        proposal.SecondJudgeApproved = false;
+                                        proposal.LatestOperation = "تایید شده توسط داوران";
+                                    }
+                                    else
+                                    {
+                                        nextStage = currentStage;
+                                    }
+                                    break;
+                                }
+                            case 5:
+                                {
+                                    if (proposal.FirstJudgeID == ProfessorID)
+                                    {
+                                        proposal.FirstJudgeApproved = true;
+                                    }
+                                    else if (proposal.SecondJudgeID == ProfessorID)
+                                    {
+                                        proposal.SecondJudgeApproved = true;
+                                    }
+                                    if (proposal.SecondJudgeApproved && proposal.FirstJudgeApproved)
+                                    {
+                                        nextStage = StageRepository.SelectBy(p => p.Order == 6).FirstOrDefault();
+                                        proposal.FirstJudgeApproved = false;
+                                        proposal.SecondJudgeApproved = false;
+                                        proposal.LatestOperation = "تایید شده توسط داوران";
+                                    }
+                                    else
+                                    {
+                                        nextStage = currentStage;
+                                    }
+                                    
+                                    break;
+                                }
+                            case 6:
+                                {
+                                    if (proposal.FirstJudgeID == ProfessorID)
+                                    {
+                                        proposal.FirstJudgeApproved = true;
+                                    }
+                                    else if (proposal.SecondJudgeID == ProfessorID)
+                                    {
+                                        proposal.SecondJudgeApproved = true;
+                                    }
+                                    if (proposal.SecondJudgeApproved && proposal.FirstJudgeApproved)
+                                    {
+                                        nextStage = StageRepository.SelectBy(p => p.Order == 10).FirstOrDefault();
+                                        proposal.FirstJudgeApproved = false;
+                                        proposal.SecondJudgeApproved = false;
+                                        proposal.LatestOperation = "تایید شده توسط داوران در جلسه دفاع";
+                                    }
+                                    else
+                                    {
+                                        nextStage = currentStage;
+                                    }
+                                    
+                                    break;
+                                }
+                            case 8:
+                                {
+                                    nextStage = StageRepository.SelectBy(p => p.Order == 10).FirstOrDefault();
+                                    proposal.LatestOperation = "تایید شده توسط استاد راهنما";
+                                    break;
+                                }
+                            case 9:
+                                {
+                                    if (proposal.FirstJudgeID == ProfessorID)
+                                    {
+                                        proposal.FirstJudgeApproved = true;
+                                    }
+                                    else if (proposal.SecondJudgeID == ProfessorID)
+                                    {
+                                        proposal.SecondJudgeApproved = true;
+                                    }
+                                    if (proposal.SecondJudgeApproved && proposal.FirstJudgeApproved)
+                                    {
+                                        nextStage = StageRepository.SelectBy(p => p.Order == 10).FirstOrDefault();
+                                        proposal.FirstJudgeApproved = false;
+                                        proposal.SecondJudgeApproved = false;
+                                        proposal.LatestOperation = "تایید شده توسط داوران";
+                                    }
+                                    else
+                                    {
+                                        nextStage = currentStage;
+                                    }
+                                    
+                                    break;
+                                }
+                            case 10:
+                                {
+                                    nextStage = StageRepository.SelectBy(p => p.Order == 13).FirstOrDefault();
+                                    proposal.LatestOperation = "تایید شده توسط شورا";
+                                    proposal.IsFinalApprove = true;
+                                    break;
+                                }
+                            case 12:
+                                {
+                                    nextStage = StageRepository.SelectBy(p => p.Order == 10).FirstOrDefault();
+                                    proposal.LatestOperation = "تایید شده توسط استاد راهنما";
+                                    break;
+                                }
+                        }
+                        if (nextStage != null)
+                        {
+                            proposal.ProposalStageID = nextStage.ID;
+                            //WorkFlow
+                            ProposalWorkflowHistory work = new ProposalWorkflowHistory
+                            {
+                                ID = Guid.NewGuid(),
+                                OccuranceDate = DateTime.Now,
+                                OccuredByProfessorID = ProfessorID,
+                                OccuredByStudentID = null,
+                                ProposalID = proposal.ID,
+                                ProposalOperationID = Guid.Parse("BF63E692-E4F9-4E7E-BF3D-1DC2C818907F")
+                            };
+                            ProposalWorkflowHistoryRepository.Add(work);
+                            //
+                            //Comment
+                            ProposalComment com = new ProposalComment
+                            {
+                                ID = Guid.NewGuid(),
+                                ImportanceLevel = comment.ImportanceLevel,
+                                Content = comment.Content,
+                                OccuranceDate = DateTime.Now,
+                                OccuredByProfessorID = ProfessorID,
+                                OccuredByStudentID = null,
+                                ProposalID = proposal.ID,
+                                ProposalStageID = currentStage.ID
+                            };
+                            ProposalCommentRepository.Add(com);
+                            //
+                        }
+                    }
+
+
+                    Commit();
+                    dbContextTransaction.Commit();
+                    dbContextTransaction.Dispose();
+
+                    return "";
+                }
+                catch (Exception e)
+                {
+                    dbContextTransaction.Rollback();
+                    dbContextTransaction.Dispose();
+                    return "خطا در سرور";
+                }
+            }
+        }
+
+        public string RejectProposal(Guid ID, Guid ProfessorID , ProposalComment comment, bool BigChanges = true)
+        {
+            using (var dbContextTransaction = Context.Database.BeginTransaction())
+            {
+                try
+                {
+                    var proposal = Get(ID);
+                    if (proposal == null)
+                    {
+                        dbContextTransaction.Rollback();
+                        dbContextTransaction.Dispose();
+                        return "اطلاعات پروپوزال اشتباه است";
+                    }
+
+                    if (proposal.ProposalStage.Order != 3 && proposal.ProposalStage.Order != 5 && proposal.ProposalStage.Order != 6 && proposal.ProposalStage.Order != 8 && proposal.ProposalStage.Order != 9 && proposal.ProposalStage.Order != 10 && proposal.ProposalStage.Order != 12)
+                    {
+                        dbContextTransaction.Rollback();
+                        dbContextTransaction.Dispose();
+                        return "پروپوزال در دست بررسی این کاربر قرار نیست";
+                    }
+
+
+                    var currentStage = StageRepository.Get(proposal.ProposalStageID);
+                    if (currentStage != null)
+                    {
+                        ProposalStage nextStage = null;
+
+
+                        //5 ==> 4
+                        //9 ==> 7
+                        //3 ==> 4
+                        //6 ==> 7 BigChanges
+                        //8 ==> 7
+                        //10 ==> 11
+                        //12 ==> 11
+                        switch (currentStage.Order)
+                        {
+                            case 3:
+                                {
+                                    if (proposal.FirstJudgeID == ProfessorID)
+                                    {
+                                        proposal.FirstJudgeApproved = true;
+                                    }
+                                    else if (proposal.SecondJudgeID == ProfessorID)
+                                    {
+                                        proposal.SecondJudgeApproved = true;
+                                    }
+                                    if (proposal.SecondJudgeApproved && proposal.FirstJudgeApproved)
+                                    {
+                                        nextStage = StageRepository.SelectBy(p => p.Order == 4).FirstOrDefault();
+                                        proposal.FirstJudgeApproved = false;
+                                        proposal.SecondJudgeApproved = false;
+                                        proposal.LatestOperation = "رد شده توسط داوران";
+                                    }
+                                    else
+                                    {
+                                        nextStage = currentStage;
+                                    }
+                                    break;
+                                }
+                            case 5:
+                                {
+                                    if (proposal.FirstJudgeID == ProfessorID)
+                                    {
+                                        proposal.FirstJudgeApproved = true;
+                                    }
+                                    else if (proposal.SecondJudgeID == ProfessorID)
+                                    {
+                                        proposal.SecondJudgeApproved = true;
+                                    }
+                                    if (proposal.SecondJudgeApproved && proposal.FirstJudgeApproved)
+                                    {
+                                        nextStage = StageRepository.SelectBy(p => p.Order == 4).FirstOrDefault();
+                                        proposal.FirstJudgeApproved = false;
+                                        proposal.SecondJudgeApproved = false;
+                                        proposal.LatestOperation = "رد شده توسط داوران";
+                                    }
+                                    else
+                                    {
+                                        nextStage = currentStage;
+                                    }
+
+                                    break;
+                                }
+                            case 6:
+                                {
+                                    if (proposal.FirstJudgeID == ProfessorID)
+                                    {
+                                        proposal.FirstJudgeApproved = true;
+                                    }
+                                    else if (proposal.SecondJudgeID == ProfessorID)
+                                    {
+                                        proposal.SecondJudgeApproved = true;
+                                    }
+                                    if (proposal.SecondJudgeApproved && proposal.FirstJudgeApproved)
+                                    {
+                                        nextStage = StageRepository.SelectBy(p => p.Order == 7).FirstOrDefault();
+                                        proposal.FirstJudgeApproved = false;
+                                        proposal.SecondJudgeApproved = false;
+                                        proposal.BigChangesForJudges = BigChanges;
+                                        proposal.LatestOperation = "رد شده توسط داوران در جلسه دفاع";
+                                    }
+                                    else
+                                    {
+                                        nextStage = currentStage;
+                                    }
+
+                                    break;
+                                }
+                            case 8:
+                                {
+                                    nextStage = StageRepository.SelectBy(p => p.Order == 7).FirstOrDefault();
+                                    proposal.LatestOperation = "رد شده توسط استاد راهنما";
+                                    break;
+                                }
+                            case 9:
+                                {
+                                    if (proposal.FirstJudgeID == ProfessorID)
+                                    {
+                                        proposal.FirstJudgeApproved = true;
+                                    }
+                                    else if (proposal.SecondJudgeID == ProfessorID)
+                                    {
+                                        proposal.SecondJudgeApproved = true;
+                                    }
+                                    if (proposal.SecondJudgeApproved && proposal.FirstJudgeApproved)
+                                    {
+                                        nextStage = StageRepository.SelectBy(p => p.Order == 7).FirstOrDefault();
+                                        proposal.FirstJudgeApproved = false;
+                                        proposal.SecondJudgeApproved = false;
+                                        proposal.LatestOperation = "رد شده توسط داوران";
+                                    }
+                                    else
+                                    {
+                                        nextStage = currentStage;
+                                    }
+
+                                    break;
+                                }
+                            case 10:
+                                {
+                                    nextStage = StageRepository.SelectBy(p => p.Order == 11).FirstOrDefault();
+                                    proposal.IsFinalApprove = true;
+                                    proposal.LatestOperation = "رد شده توسط شورا";
+                                    break;
+                                }
+                            case 12:
+                                {
+                                    nextStage = StageRepository.SelectBy(p => p.Order == 11).FirstOrDefault();
+                                    proposal.LatestOperation = "رد شده توسط استاد راهنما";
+                                    break;
+                                }
+                        }
+                        if (nextStage != null)
+                        {
+                            proposal.ProposalStageID = nextStage.ID;
+                            //WorkFlow
+                            ProposalWorkflowHistory work = new ProposalWorkflowHistory
+                            {
+                                ID = Guid.NewGuid(),
+                                OccuranceDate = DateTime.Now,
+                                OccuredByProfessorID = ProfessorID,
+                                OccuredByStudentID = null,
+                                ProposalID = proposal.ID,
+                                ProposalOperationID = Guid.Parse("73142388-9CE9-465A-AC7E-830B5D5F317C")
+                            };
+                            ProposalWorkflowHistoryRepository.Add(work);
+                            //
+                            //Comment
+                            ProposalComment com = new ProposalComment {
+                                ID = Guid.NewGuid(),
+                                ImportanceLevel = comment.ImportanceLevel,
+                                Content = comment.Content,
+                                OccuranceDate = DateTime.Now,
+                                OccuredByProfessorID = ProfessorID,
+                                OccuredByStudentID = null,
+                                ProposalID = proposal.ID,
+                                ProposalStageID = currentStage.ID
+                            };
+                            ProposalCommentRepository.Add(com);
+                            //
+                        }
+                    }
+
+
+                    Commit();
+                    dbContextTransaction.Commit();
+                    dbContextTransaction.Dispose();
+
+                    return "";
+                }
+                catch (Exception e)
+                {
+                    dbContextTransaction.Rollback();
+                    dbContextTransaction.Dispose();
+                    return "خطا در سرور";
+                }
+            }
+        }
+
+        public string AssignJudges(Guid ProposalID, Guid FirstJudgeID, Guid SecondJudgeID)
+        {
+            using (var dbContextTransaction = Context.Database.BeginTransaction())
+            {
+                try
+                {
+                    var proposal = Get(ProposalID);
+                    if (proposal == null)
+                    {
+                        dbContextTransaction.Rollback();
+                        dbContextTransaction.Dispose();
+                        return "اطلاعات پروپوزال اشتباه است";
+                    }
+
+                    var p1 = ProfessorRepository.Value.Get(FirstJudgeID);
+                    var p2 = ProfessorRepository.Value.Get(SecondJudgeID);
+                    if (p1 == null || p2 == null)
+                    {
+                        dbContextTransaction.Rollback();
+                        dbContextTransaction.Dispose();
+                        return "اطلاعات داوران اشتباه است";
+                    }
+
+                    proposal.FirstJudgeID = p1.ID;
+                    proposal.SecondJudgeID = p2.ID;
+                    proposal.ProposalStageID = StageRepository.SelectBy(p => p.Order == 3).FirstOrDefault().ID;
+                    proposal.LatestOperation = "تعیین داوران توسط مدیر گروه";
 
                     Commit();
                     dbContextTransaction.Commit();

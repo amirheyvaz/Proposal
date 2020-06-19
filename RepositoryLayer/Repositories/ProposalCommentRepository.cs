@@ -31,7 +31,8 @@ namespace RepositoryLayer.Repositories
                     ImportanceLevel = p.ImportanceLevel.HasValue ? p.ImportanceLevel.Value : 0,
                     OccuranceDate = p.OccuranceDate.GregorianToShamsi(),
                     StageID = p.ProposalStageID,
-                    StageTitle = p.ProposalStage.Title
+                    StageTitle = p.ProposalStage.Title,
+                    Content = p.Content
                 }).ToList();
         }
     }
