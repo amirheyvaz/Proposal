@@ -21,6 +21,7 @@ namespace RepositoryLayer.Repositories
         {
             return SelectBy(q => q.ProposalID == ProposalID)
                 .AsEnumerable()
+                .OrderByDescending(o => o.OccuranceDate)
                 .Select(p => new ProposalCommentJSON {
                     ID = p.ID,
                     ProposalID = p.ProposalID,

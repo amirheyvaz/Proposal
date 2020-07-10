@@ -19,7 +19,7 @@ namespace RepositoryLayer.Repositories
 
         public List<ProposalWorkflowHistoryJSON> GetAllHistories(Guid ProposalID)
         {
-            return SelectBy(q => q.ProposalID == ProposalID).AsEnumerable().Select(p => new ProposalWorkflowHistoryJSON {
+            return SelectBy(q => q.ProposalID == ProposalID).AsEnumerable().OrderByDescending(o => o.OccuranceDate).Select(p => new ProposalWorkflowHistoryJSON {
                 ProposalID = p.ProposalID,
                 ID = p.ID,
                 ProposalName = p.Proposal.Name,

@@ -8,7 +8,9 @@ namespace InfrastructureLayer.JSONObjects
 {
     public class ProposalGeneralInfoJSON
     {
-        public string File { get; set; }
+        //public string File { get; set; }
+
+        public Guid FileID { get; set; }
 
         public string Name { get; set; }
 

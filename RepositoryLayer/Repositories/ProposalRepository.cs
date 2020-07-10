@@ -84,7 +84,18 @@ namespace RepositoryLayer.Repositories
                     };
                     ProposalWorkflowHistoryRepository.Add(work);
                     //
-                    
+
+                    ProposalFile pf = ProposalFileRepository.Get(ProposalJSON.FileID);
+                    if(pf == null)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        pf.ProposalID = p.ID;
+                    }
+
+
                     Commit();
                     dbContextTransaction.Commit();
                     dbContextTransaction.Dispose();
@@ -102,6 +113,7 @@ namespace RepositoryLayer.Repositories
 
         public ProposalJSON GetProposalByStudentID(Guid StudentID)
         {
+            var Editables = new List<int>() { 1 , 4 , 7 , 11 };
             return SelectBy(s => s.StudentID == StudentID).AsEnumerable().Select(p => new ProposalJSON {
                 ID = p.ID,
                 Name = p.Name,
@@ -130,7 +142,8 @@ namespace RepositoryLayer.Repositories
                 Keywords = KeywordRepository.GetProposalKeywords(p.ID),
                 Comments = ProposalCommentRepository.GetAllProposalComments(p.ID),
                 WorkflowHistories = ProposalWorkflowHistoryRepository.GetAllHistories(p.ID),
-                Deletable = ProposalWorkflowHistoryRepository.GetAllHistories(p.ID).Count < 2,
+                Deletable = p.ProposalStage.Order == 1,
+                Editable = Editables.Contains(p.ProposalStage.Order),
                 Sendable = p.ProposalStage.Order == 1 || p.ProposalStage.Order == 4 || p.ProposalStage.Order == 7 || p.ProposalStage.Order == 11
             }).FirstOrDefault();
         }
@@ -226,7 +239,7 @@ namespace RepositoryLayer.Repositories
             }).ToList();
         }
 
-        public string SendProposal(Guid ID , ProposalComment comment)
+        public string SendProposal(Guid ID )//, ProposalComment comment)
         {
             
             using (var dbContextTransaction = Context.Database.BeginTransaction())
@@ -285,18 +298,18 @@ namespace RepositoryLayer.Repositories
                             ProposalWorkflowHistoryRepository.Add(work);
                             //
                             //Comment
-                            ProposalComment com = new ProposalComment
-                            {
-                                ID = Guid.NewGuid(),
-                                ImportanceLevel = comment.ImportanceLevel,
-                                Content = comment.Content,
-                                OccuranceDate = DateTime.Now,
-                                OccuredByProfessorID = null,
-                                OccuredByStudentID = proposal.StudentID,
-                                ProposalID = proposal.ID,
-                                ProposalStageID = currentStage.ID
-                            };
-                            ProposalCommentRepository.Add(com);
+                            //ProposalComment com = new ProposalComment
+                            //{
+                            //    ID = Guid.NewGuid(),
+                            //    ImportanceLevel = comment.ImportanceLevel,
+                            //    Content = comment.Content,
+                            //    OccuranceDate = DateTime.Now,
+                            //    OccuredByProfessorID = null,
+                            //    OccuredByStudentID = proposal.StudentID,
+                            //    ProposalID = proposal.ID,
+                            //    ProposalStageID = currentStage.ID
+                            //};
+                            //ProposalCommentRepository.Add(com);
                             //
                         }
                     }
@@ -791,5 +804,58 @@ namespace RepositoryLayer.Repositories
 
             }
         }
+
+        public bool EditProposal(Guid ProposalID, Guid FileID , string com)
+        {
+            using (var transaction = Context.Database.BeginTransaction())
+            {
+                try
+                {
+
+                    var proposal = Get(ProposalID);
+                    var file = ProposalFileRepository.Get(FileID);
+                    if (file == null || proposal == null)
+                    {
+                        return false;
+                    }
+  
+                    file.ProposalID = ProposalID;
+
+                    ProposalWorkflowHistory w = new ProposalWorkflowHistory() {
+                        ID = Guid.NewGuid(),
+                        OccuredByProfessorID = null,
+                        OccuredByStudentID = proposal.StudentID,
+                        OccuranceDate = DateTime.Now,
+                        ProposalID = proposal.ID,
+                        ProposalOperationID = Guid.Parse("bf63e692-e4f9-4e7e-bf3d-1dc2c8189078")
+                    };
+                    ProposalWorkflowHistoryRepository.Add(w);
+
+                    ProposalComment c = new ProposalComment() {
+                        ID = Guid.NewGuid(),
+                        OccuredByProfessorID = null,
+                        OccuredByStudentID = proposal.StudentID,
+                        OccuranceDate = DateTime.Now,
+                        Content = com,
+                        ProposalID = proposal.ID,
+                        ImportanceLevel = null,
+                        ProposalStageID = proposal.ProposalStageID
+                    };
+                    ProposalCommentRepository.Add(c);
+
+                    Commit();
+                    transaction.Commit();
+                    transaction.Dispose();
+                return true;
+                }
+                catch (Exception e)
+                {
+                    transaction.Rollback();
+                    transaction.Dispose();
+                    return false;
+                }
+
+        }
+    }
     }
 }

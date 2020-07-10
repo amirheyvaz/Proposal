@@ -78,6 +78,8 @@ namespace InfrastructureLayer.JSONObjects
 
         public bool Sendable { get; set; }
 
+        public bool Editable { get; set; }
+
         public bool WaitingForDefenceMeetingTiming { get; set; }
 
         public bool WaitingForDefenceMeetingJudgement { get; set; }

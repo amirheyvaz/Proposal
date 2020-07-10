@@ -14,5 +14,34 @@ namespace RepositoryLayer.Repositories
         public ProposalFileRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
         {
         }
+
+        public bool DeleteFilesByPID(Guid ProposalID)
+        {
+            using (var transaction = Context.Database.BeginTransaction())
+            {
+                try
+                {
+
+                    var OtherFile = SelectBy(p => p.ProposalID == ProposalID).AsEnumerable().ToList();
+
+                    foreach(var f in OtherFile)
+                    {
+                        DeleteById(f.ID);
+                    }
+
+                    Commit();
+                    transaction.Commit();
+                    transaction.Dispose();
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    transaction.Rollback();
+                    transaction.Dispose();
+                    return false;
+                }
+
+            }
+        }
     }
 }

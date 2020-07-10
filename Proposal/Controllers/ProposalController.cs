@@ -10,6 +10,9 @@ using RepositoryLayer.Interfaces;
 using Proposal.Core;
 using InfrastructureLayer.JSONObjects;
 using ModelsLayer.Models;
+using System.Threading.Tasks;
+using System.Web;
+using System.IO;
 
 namespace Proposal.Controllers
 {
@@ -117,14 +120,14 @@ namespace Proposal.Controllers
 
         [HttpGet]
         [Route("SendProposal/{ProposalID}")]
-        public string SendProposal (Guid ProposalID , [FromBody] ProposalCommentJSON comment)
+        public string SendProposal (Guid ProposalID)// , [FromBody] ProposalCommentJSON comment)
         {
             var ProposalRepository = IocConfig.Container.GetInstance<IProposalRepository>();
-            ProposalComment p = new ProposalComment {
-                Content = comment.Content,
-                ImportanceLevel = comment.ImportanceLevel
-            };
-            return ProposalRepository.SendProposal(ProposalID , p);
+            //ProposalComment p = new ProposalComment {
+            //    Content = comment.Content,
+            //    ImportanceLevel = comment.ImportanceLevel
+            //};
+            return ProposalRepository.SendProposal(ProposalID);//, p);
         }
 
         [HttpPost]
@@ -183,6 +186,93 @@ namespace Proposal.Controllers
             }
 
             return ProposalRepository.AssignDefenceMeetingTime(dateTime,time,ProposalID);
+        }
+
+        [HttpPost]
+        [Route("UploadPRoposalFile")]
+        public Guid UploadPRoposalFile()
+        {
+            if (!Request.Content.IsMimeMultipartContent())
+            {
+                throw new HttpResponseException(HttpStatusCode.UnsupportedMediaType);
+            }
+
+            var file = HttpContext.Current.Request.Files.Count > 0 ?
+                        HttpContext.Current.Request.Files[0] : null;
+
+            if (file == null) {
+                throw new HttpResponseException(HttpStatusCode.BadRequest);
+            }
+                
+            byte[] fileData = null;
+            using (var binaryReader = new BinaryReader(HttpContext.Current.Request.Files[0].InputStream))
+            {
+                fileData = binaryReader.ReadBytes(HttpContext.Current.Request.Files[0].ContentLength);
+            }
+
+
+            var FileRep = IocConfig.Container.GetInstance<IProposalFileRepository>();
+            ProposalFile f = new ProposalFile() {
+                ID = Guid.NewGuid(),
+                File = fileData,
+                ProposalID = null
+            };
+            FileRep.Add(f, true);
+
+            return f.ID;
+
+        }
+
+        [HttpGet]
+        [Route("DownloadProposalFile/{id}")]
+        [AllowAnonymous]
+        public HttpResponseMessage DownloadProposalFile(Guid id)
+        {
+            HttpResponseMessage result = null;
+            try
+            {
+
+                var FileRep = IocConfig.Container.GetInstance<IProposalFileRepository>();
+                var PropRep = IocConfig.Container.GetInstance<IProposalRepository>();
+                var proposal = PropRep.Get(id);
+                var file = FileRep.SelectBy(p => p.ProposalID == id).FirstOrDefault();
+                if (file == null || proposal == null)
+                {
+                    throw new HttpResponseException(HttpStatusCode.NotFound);
+                }
+
+
+                // sendo file to client
+                byte[] bytes = file.File;
+
+
+
+                    result = Request.CreateResponse(HttpStatusCode.OK);
+                    result.Content = new ByteArrayContent(bytes);
+                    result.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
+                    result.Content.Headers.ContentDisposition.FileName = proposal.Name + ".pdf";
+                
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return Request.CreateResponse(HttpStatusCode.Gone);
+            }
+        }
+
+        [HttpPost]
+        [Route("EditProposal/{ProposalID}/{FileID}")]
+        public bool EditProposal (Guid ProposalID , Guid FileID , [FromBody] ProposalCommentJSON comment)
+        {
+            var PropRep = IocConfig.Container.GetInstance<IProposalRepository>();
+            var ComRep = IocConfig.Container.GetInstance<IProposalFileRepository>();
+            if (!ComRep.DeleteFilesByPID(ProposalID))
+            {
+                return false;
+            }
+            return PropRep.EditProposal(ProposalID , FileID , comment.Content);
+
         }
     }
 }

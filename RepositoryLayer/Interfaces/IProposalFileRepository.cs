@@ -9,5 +9,6 @@ namespace RepositoryLayer.Interfaces
 {
     public interface IProposalFileRepository : IGenericRepository<ProposalFile , Guid>
     {
+        bool DeleteFilesByPID(Guid ProposalID);
     }
 }

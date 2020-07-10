@@ -13,7 +13,7 @@ namespace ModelsLayer.Models
     {
         public byte[] File { get; set; }
 
-        public Guid ProposalID { get; set; }
+        public Guid? ProposalID { get; set; }
 
         [ForeignKey("ProposalID")]
         public virtual Proposal Proposal { get; set; }
