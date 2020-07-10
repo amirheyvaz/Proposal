@@ -56,6 +56,8 @@ namespace ModelsLayer.Models
 
         public DateTime? DefenceMeetingTime { get; set; }
 
+        public string DefenceMeetingHour { get; set; }
+
         public virtual ICollection<ProposalWorkflowHistory> WorkflowHistories { get; set; }
 
         public virtual ICollection<ProposalKeyword> ProposalKeywords { get; set; }

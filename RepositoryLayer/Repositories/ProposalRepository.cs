@@ -174,12 +174,12 @@ namespace RepositoryLayer.Repositories
             List<Proposal> proposals = new List<Proposal>();
             Professor pro = ProfessorRepository.Value.Get(ProfessorID);
 
-            proposals.AddRange(SelectBy(p => p.Student.FacultyID == pro.FacultyID && (p.ProposalStage.Order == 3 || p.ProposalStage.Order == 5 || p.ProposalStage.Order == 9)  && ((p.FirstJudgeID == ProfessorID && !p.FirstJudgeApproved )|| (p.SecondJudgeID == ProfessorID && !p.SecondJudgeApproved))));
+            proposals.AddRange(SelectBy(p => p.Student.FacultyID == pro.FacultyID && (p.ProposalStage.Order == 3 || p.ProposalStage.Order == 5 || p.ProposalStage.Order == 9 || (p.DefenceMeetingTime.HasValue && p.ProposalStage.Order == 6))  && ((p.FirstJudgeID == ProfessorID && !p.FirstJudgeApproved )|| (p.SecondJudgeID == ProfessorID && !p.SecondJudgeApproved))));
             proposals.AddRange(SelectBy(p => p.Student.FacultyID == pro.FacultyID && (p.Student.FirstGuidingProfessorID == ProfessorID || p.Student.SecondGuidingProfessorID == ProfessorID) && (p.ProposalStage.Order == 8 || p.ProposalStage.Order == 12)));
             if (pro.EducationalGroups_Manager.Any())
             {
                 List<Guid> FacultyIDs = pro.EducationalGroups_Manager.Select(m => m.FacultyID).ToList();
-                proposals.AddRange(SelectBy(p => p.ProposalStage.Order == 2 && FacultyIDs.Contains(p.Student.FacultyID)));
+                proposals.AddRange(SelectBy(p => ((p.ProposalStage.Order == 6 && !p.DefenceMeetingTime.HasValue)||p.ProposalStage.Order == 2) && FacultyIDs.Contains(p.Student.FacultyID)));
             }
             if (pro.IsCouncilMember)
             {
@@ -205,7 +205,7 @@ namespace RepositoryLayer.Repositories
                  SecondJudgeFullName = p.SecondJudgeID.HasValue ? p.SecondJudge.FirstName + " " + p.SecondJudge.LastName : "",
                  SecondJudgeSocialSecurityNumber = p.SecondJudgeID.HasValue ? p.SecondJudge.SocialSecurityNumber : "",
                  ProposalStageID = p.ProposalStageID,
-                 ProposalStageTitle = "در انتظار اقدام " + p.ProposalStage.Title,
+                 ProposalStageTitle = !p.ProposalStage.IsLast ? ("در انتظار اقدام " + p.ProposalStage.Title) : p.ProposalStage.Title,
                  ProposalStageOrder = p.ProposalStage.Order,
                  LatestOperation = p.LatestOperation,
                  ProposalStatusID = p.ProposalStatusID,
@@ -220,7 +220,9 @@ namespace RepositoryLayer.Repositories
                  WaitingForJudgeApprovement = /*(!p.FirstJudgeApproved || !p.SecondJudgeApproved) && */ (p.ProposalStage.Order == 3 || p.ProposalStage.Order == 5 || p.ProposalStage.Order == 9),
                  WaitingForJudgeAssignment = p.ProposalStage.Order == 2,
                  WaitingForGuidingProfessorApprovement = (p.ProposalStage.Order == 8 || p.ProposalStage.Order == 12),
-                 WaitingForCouncilApprovement = p.ProposalStage.Order == 10
+                 WaitingForCouncilApprovement = p.ProposalStage.Order == 10,
+                 WaitingForDefenceMeetingTiming = p.ProposalStage.Order == 6 && !p.DefenceMeetingTime.HasValue,
+                 WaitingForDefenceMeetingJudgement = p.ProposalStage.Order == 6 && p.DefenceMeetingTime.HasValue
             }).ToList();
         }
 
@@ -755,6 +757,38 @@ namespace RepositoryLayer.Repositories
                     dbContextTransaction.Dispose();
                     return "خطا در سرور";
                 }
+            }
+        }
+
+        public bool AssignDefenceMeetingTime(DateTime date , string Time , Guid ProposalID)
+        {
+            using (var transaction = Context.Database.BeginTransaction())
+            {
+                try
+                {
+
+                    var Proposal = Get(ProposalID);
+                    if (Proposal == null)
+                        return false;
+
+                    Proposal.DefenceMeetingHour = Time;
+                    Proposal.DefenceMeetingTime = date;
+                    Proposal.LatestOperation = "تعیین زمان جلسه دفاع توسط مدیر گروه";
+                    
+
+
+                    Commit();
+                    transaction.Commit();
+                    transaction.Dispose();
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    transaction.Rollback();
+                    transaction.Dispose();
+                    return false;
+                }
+
             }
         }
     }

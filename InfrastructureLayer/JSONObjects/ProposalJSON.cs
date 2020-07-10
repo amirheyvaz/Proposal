@@ -77,5 +77,9 @@ namespace InfrastructureLayer.JSONObjects
         public bool Deletable { get; set; }
 
         public bool Sendable { get; set; }
+
+        public bool WaitingForDefenceMeetingTiming { get; set; }
+
+        public bool WaitingForDefenceMeetingJudgement { get; set; }
     }
 }

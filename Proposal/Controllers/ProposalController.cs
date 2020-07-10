@@ -169,5 +169,20 @@ namespace Proposal.Controllers
             var ProposalRepository = IocConfig.Container.GetInstance<IProposalRepository>();
             return ProposalRepository.AssignJudges(ProposalID , FirstJudgeID , SecondJudgeID);
         }
+
+        [HttpGet]
+        [Route("AssignDefenceMeetingTime/{ProposalID}/{date}/{time}")]
+        public bool AssignDefenceMeetingTime(string date, string time, Guid ProposalID)
+        {
+            var ProposalRepository = IocConfig.Container.GetInstance<IProposalRepository>();
+
+            DateTime dateTime;
+            if(!DateTime.TryParse(date , out dateTime))
+            {
+                return false;
+            }
+
+            return ProposalRepository.AssignDefenceMeetingTime(dateTime,time,ProposalID);
+        }
     }
 }

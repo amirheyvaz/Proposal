@@ -18,5 +18,6 @@ namespace RepositoryLayer.Interfaces
         string ApproveProposal(Guid ID, Guid ProfessorID, ProposalComment comment);
         string RejectProposal(Guid ID, Guid ProfessorID, ProposalComment comment, bool BigChanges = true);
         string AssignJudges(Guid ProposalID, Guid FirstJudgeID, Guid SecondJudgeID);
+        bool AssignDefenceMeetingTime(DateTime date, string Time, Guid ProposalID);
     }
 }
