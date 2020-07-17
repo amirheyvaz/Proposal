@@ -10,10 +10,6 @@ namespace Test.Authentication
     [TestFixture]
     public class Auth
     {
-        [Test]
-        public void Test_User_Pass()
-        {
-            Assert.That(1 == 1);
-        }
+     
     }
 }
